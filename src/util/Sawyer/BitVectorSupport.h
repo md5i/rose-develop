@@ -972,6 +972,23 @@ boost::uint64_t toInteger(const Word *words, const BitRange &range) {
     return result;
 }
 
+/** Convert a bit vector to an integer.
+ *
+ *  Faster version of toInteger for instances where the range is simple, and the size is less than 64 bits.
+ */
+template<class Word>
+boost::uint64_t toInteger(const Word *words, size_t nbits) {
+    boost::uint64_t result = 0;
+    size_t nTmpWords = numberOfWords<Word>(nbits);
+    for (size_t i=0; i<nTmpWords; ++i) {
+        result |= (boost::uint64_t)words[i] << (i * bitsPerWord<Word>::value);
+    }
+    if (nbits < 64) {
+        result &= ~((~UINT64_C(0)) << nbits);
+    }
+    return result;
+}
+
 template<class Word>
 struct Increment {
     bool carry;
